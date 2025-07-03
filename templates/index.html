@@ -38,6 +38,7 @@
         <th>Teléfono</th>
         <th>Fecha</th>
         <th>Hora</th>
+        <th>Editar</th>
     </tr>
     {% for item in registros %}
     <tr>
@@ -45,6 +46,11 @@
         <td>{{ item.telefono }}</td>
         <td>{{ item.dia }}</td>
         <td>{{ item.hora }}</td>
+        <td>
+            <button>Confirmar</button>
+            <button>Reprogramar</button>
+            <button>Eliminar</button>
+        </td>
     </tr>
     {% endfor %}
 </table>
