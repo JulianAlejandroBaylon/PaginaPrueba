@@ -9,9 +9,9 @@
     <form method="POST">
     <h1>Registra tu cita</h1>
     <label for="nombre">Nombre:</label>
-    <input type="text" name="nombre" id="nombre">
+    <input type="text" name="nombre" id="nombre" required>
     <label for="telefono">Telefono:</label>
-    <input type="text" name="telefono" id="telefono">
+    <input type="text" name="telefono" id="telefono" required>
     <label for="fecha">Fecha:</label>
     <select name="fecha">
         {% for fecha in fechas %}
@@ -27,33 +27,74 @@
     </select>
     </label>
     <button type="submit">Confirmar</button>
+    <br>
+    {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul style="color:red;">
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
     </form>
 
     <h2>Registros</h2>
 
 {% if registros %}
-<table border="1" cellpadding="5">
+<table border="1">
     <tr>
         <th>Nombre</th>
         <th>Teléfono</th>
         <th>Fecha</th>
         <th>Hora</th>
-        <th>Editar</th>
+        <th>Acciones</th>
     </tr>
     {% for item in registros %}
     <tr>
         <td>{{ item.nombre }}</td>
         <td>{{ item.telefono }}</td>
         <td>{{ item.dia }}</td>
-        <td>{{ item.hora }}</td>
         <td>
-            <button>Confirmar</button>
-            <button>Reprogramar</button>
-            <button>Eliminar</button>
+            {% if item.estado == 'reprogramando' %}
+                <form method="POST" action="{{ url_for('guardar_reprogramacion') }}">
+                    <input type="hidden" name="index" value="{{ loop.index0 }}">
+                    <select name="nueva_hora">
+                        {% for hora in horarios %}
+                            <option value="{{ hora }}">{{ hora }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit">Guardar</button>
+                </form>
+            {% else %}
+                {{ item.hora }}
+            {% endif %}
+        </td>
+        <td>
+            {% if item.estado == 'confirmado' %}
+                <strong>Confirmado</strong>
+            {% elif item.estado == 'reprogramando' %}
+                <!-- no mostrar más botones aquí -->
+            {% else %}
+                <form method="POST" action="{{ url_for('confirmar_registro') }}" style="display:inline;">
+                    <input type="hidden" name="index" value="{{ loop.index0 }}">
+                    <button type="submit">Confirmar</button>
+                </form>
+                <form method="POST" action="{{ url_for('reprogramar_registro') }}" style="display:inline;">
+                    <input type="hidden" name="index" value="{{ loop.index0 }}">
+                    <button type="submit">Reprogramar</button>
+                </form>
+                <form method="POST" action="{{ url_for('eliminar_registro') }}" style="display:inline;">
+                    <input type="hidden" name="index" value="{{ loop.index0 }}">
+                    <button type="submit">Eliminar</button>
+                </form>
+            {% endif %}
         </td>
     </tr>
     {% endfor %}
 </table>
+
 {% else %}
 <p>No hay registros todavía.</p>
 {% endif %}

@@ -1,6 +1,7 @@
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, render_template, request, redirect, url_for
 from datetime import datetime, timedelta
 import locale
+from flask import flash
 
 app = Flask(__name__)
 locale.setlocale(locale.LC_TIME, 'es_ES.utf8') 
@@ -11,12 +12,13 @@ MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio',
 
 
 registros = []
+app.secret_key = 'jhdkasdhuagfifhaksdhaidjas'
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
         guardar_registro()
-        return redirect(url_for('home'))
+        return redirect(url_for('home'))   
 
     fechas = generar_fechas()
     horarios = generar_horarios()
@@ -47,19 +49,55 @@ def generar_horarios():
     return [f"{h:02d}:00" for h in range(10, 17)]
 
 def guardar_registro():
+
     nombre = request.form['nombre']
     telefono = request.form['telefono']
     dia = request.form['fecha']
     hora = request.form['hora']
 
+    for r in registros:
+        if r['dia'] == dia and r['hora'] == hora:
+            flash(f"Ya existe un registro para {dia} a las {hora}.")
+            return
+
     registros.append({
         'nombre': nombre,
         'telefono': telefono,
         'dia': dia,
-        'hora': hora
+        'hora': hora,
+        'estado': 'pendiente' 
     })
 
+@app.route('/confirmar', methods=['POST'])
+def confirmar_registro():
+    index = int(request.form['index'])
+    if 0 <= index < len(registros):
+        registros[index]['estado'] = 'confirmado'
+    return redirect(url_for('home'))
 
+@app.route('/reprogramar_registro', methods=['POST'])
+def reprogramar_registro():
+    index = int(request.form['index'])
+    if 0 <= index < len(registros):
+        registros[index]['estado'] = 'reprogramando'
+    return redirect(url_for('home'))
+
+
+@app.route('/eliminar', methods=['POST'])
+def eliminar_registro():
+    index = int(request.form['index'])
+    if 0 <= index < len(registros):
+        registros.pop(index)
+    return redirect(url_for('home'))
+
+@app.route('/guardar_reprogramacion', methods=['POST'])
+def guardar_reprogramacion():
+    index = int(request.form['index'])
+    nueva_hora = request.form['nueva_hora']
+    if 0 <= index < len(registros):
+        registros[index]['hora'] = nueva_hora
+        registros[index]['estado'] = 'pendiente'
+    return redirect(url_for('home'))
 
 
 if __name__ == '__main__':
