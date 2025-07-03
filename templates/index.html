@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de citas</title>
+</head>
+<body>
+    <form method="POST">
+    <h1>Registra tu cita</h1>
+    <label for="nombre">Nombre:</label>
+    <input type="text" name="nombre" id="nombre">
+    <label for="telefono">Telefono:</label>
+    <input type="text" name="telefono" id="telefono">
+    <label for="fecha">Fecha:</label>
+    <select name="fecha">
+        {% for fecha in fechas %}
+            <option value="{{ fecha }}">{{ fecha }}</option>
+        {% endfor %}
+    </select>
+    </label>
+    <label for="hora">Hora:
+    <select name="hora">
+        {% for hora in horarios %}
+            <option value="{{ hora }}">{{ hora }}</option>
+        {% endfor %}
+    </select>
+    </label>
+    <button type="submit">Confirmar</button>
+    </form>
+
+    <h2>Registros</h2>
+
+{% if registros %}
+<table border="1" cellpadding="5">
+    <tr>
+        <th>Nombre</th>
+        <th>Teléfono</th>
+        <th>Fecha</th>
+        <th>Hora</th>
+    </tr>
+    {% for item in registros %}
+    <tr>
+        <td>{{ item.nombre }}</td>
+        <td>{{ item.telefono }}</td>
+        <td>{{ item.dia }}</td>
+        <td>{{ item.hora }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No hay registros todavía.</p>
+{% endif %}
+</body>
+</html>
